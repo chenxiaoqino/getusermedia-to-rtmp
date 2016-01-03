@@ -102,7 +102,7 @@ io.on('connection', function(socket){
 		feedStream(m);
 	});
 	socket.on('disconnect', function () {
-		//console.log('user disconnected');
+		console.log('user disconnected');
 		feedStream=false;
 		if(ffmpeg_process)
 		try{
@@ -122,3 +122,10 @@ io.on('error',function(e){
 http.listen(8888, function(){
   //console.log('listening on *:8888');
 });
+
+
+process.on('uncaughtException', function(err) {
+    // handle the error safely
+    console.log(err)
+//what the heck is the error?
+})
