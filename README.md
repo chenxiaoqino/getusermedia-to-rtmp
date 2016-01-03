@@ -4,7 +4,9 @@ This project intends to allow an endpoint user to submit RTMP live video streami
 
 ## Usage
 
-Start the server by `npm install` and `node server.js`, then open firefox to http://localhost:8888/ .
+Start the server by `npm install` and `node server.js`, then open firefox to http://127.0.0.1:8888/ . The rtmp stream will be submitted to rtmp://127.0.0.1/live .
+
+Please make sure there's an rtmp server up and running; try `nginx-rtmp-module` if you don't have one.
 
 ## How does it work
 
