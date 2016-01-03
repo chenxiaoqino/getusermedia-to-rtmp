@@ -75,8 +75,13 @@ io.on('connection', function(socket){
 		});
 		ffmpeg_process.on('error',function(e){
 			console.log('child process error'+e);
-			socket.emit('fatal','ffmpeg error!'+d);
+			socket.emit('fatal','ffmpeg error!'+e);
 			feedStream=false;
+			socket.disconnect();
+		});
+		ffmpeg_process.on('exit',function(e){
+			console.log('child process exit'+e);
+			socket.emit('fatal','ffmpeg exit!'+e);
 			socket.disconnect();
 		});
 	});
