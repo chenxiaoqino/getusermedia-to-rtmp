@@ -15,12 +15,8 @@ spawn('ffmpeg',['-h']).on('error',function(m){
 app.use(express.static('static'));
 
 io.on('connection', function(socket){
-	//console.log('a user connected');
 	socket.emit('message','Hello from mediarecorder-to-rtmp server!');
 	socket.emit('message','Please set rtmp destination before start streaming.');
-	//socket.on('message',function(m){
-	//	console.log('client message:',m);
-	//});
 	
 	var ffmpeg_process, feedStream=false;
 	socket.on('config_rtmpDestination',function(m){
@@ -70,28 +66,19 @@ io.on('connection', function(socket){
 		];
 		ffmpeg_process=spawn('ffmpeg', ops);
 		feedStream=function(data){
-			try{
-				ffmpeg_process.stdin.write(data);
-			}catch(e){
-				//socket.emit('feedstream_exception',e);
-				console.log('write exception:'+e);
-				//ignore some segment in pipe is okay...
-			}
+			ffmpeg_process.stdin.write(data);
+			//write exception cannot be caught here.	
 		}
 
 		ffmpeg_process.stderr.on('data',function(d){
-			//console.log('stderr:'+d);
 			socket.emit('ffmpeg_stderr',''+d);
 		});
-		//ffmpeg_process.stderr.pipe(process.stderr);
 		ffmpeg_process.on('error',function(e){
 			console.log('child process error'+e);
-			//socket.emit('fatal','ffmpeg error!'+d);
+			socket.emit('fatal','ffmpeg error!'+d);
 			feedStream=false;
-			//socket.disconnect();
+			socket.disconnect();
 		});
-		//new subprocess process
-
 	});
 
 	socket.on('binarystream',function(m){
@@ -102,7 +89,6 @@ io.on('connection', function(socket){
 		feedStream(m);
 	});
 	socket.on('disconnect', function () {
-		console.log('user disconnected');
 		feedStream=false;
 		if(ffmpeg_process)
 		try{
@@ -120,12 +106,12 @@ io.on('error',function(e){
 });
 
 http.listen(8888, function(){
-  //console.log('listening on *:8888');
+  console.log('http and websocket listening on *:8888');
 });
 
 
 process.on('uncaughtException', function(err) {
     // handle the error safely
     console.log(err)
-//what the heck is the error?
+    // Note: after client disconnect, the subprocess will cause an Error EPIPE, which can only be caught this way.
 })
