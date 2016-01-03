@@ -22,6 +22,8 @@ socket.on('message',function(m){
 socket.on('fatal',function(m){
 	console.log('recv error message',m);
 	alert('Error:'+m);
+	mediaRecorder.stop();
+	//should reload?
 });
 socket.on('ffmpeg_stderr',function(m){console.log(m);});
 socket.on('disconnect', function () {
@@ -45,6 +47,7 @@ var onSuccess = function(stream) {
 	mediaRecorder.start(2000);
 
 	mediaRecorder.onstop = function(e) {
+		stream.stop();
 	}
 
 	mediaRecorder.ondataavailable = function(e) {
