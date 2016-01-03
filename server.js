@@ -8,18 +8,18 @@ var spawn = require('child_process').spawn;
 
 //testing
 spawn('ffmpeg',['-h']).on('error',function(m){
-	console.log("FFMpeg not found in system cli; please install ffmpeg properly or make a softlink to ./!");
+	console.error("FFMpeg not found in system cli; please install ffmpeg properly or make a softlink to ./!");
 	process.exit(-1);
 });
 
 app.use(express.static('static'));
 
 io.on('connection', function(socket){
-	console.log('a user connected');
+	//console.log('a user connected');
 	socket.emit('message','Hello from socket.io server!');
-	socket.on('message',function(m){
-		console.log('recv cli msg',m);
-	});
+	//socket.on('message',function(m){
+	//	console.log('client message:',m);
+	//});
 	
 	var ffmpeg_process, feedStream=false;
 	socket.on('config_rtmpDestination',function(m){
@@ -49,7 +49,6 @@ io.on('connection', function(socket){
 
 
 	socket.on('start',function(m){
-		console.log('starting...');
 		if(ffmpeg_process || feedStream){
 			socket.emit('fatal','stream already started.');
 			return;
@@ -68,25 +67,25 @@ io.on('connection', function(socket){
 			'-bufsize', '1000',
 			'-f', 'flv', socket._rtmpDestination
 		];
-		console.log('ffmpeg starting with ops',ops);
 		ffmpeg_process=spawn('ffmpeg', ops);
 		feedStream=function(data){
 			try{
 				ffmpeg_process.stdin.write(data);
-				console.log('pushed data',data.length);
 			}catch(e){
-				//ignore some segment in pipe is okay
+				socket.emit('exception',e);
+				//ignore some segment in pipe is okay...
 			}
 		}
 
 		ffmpeg_process.stderr.on('data',function(d){
-			console.log('stderr:'+d);
+			//console.log('stderr:'+d);
 			socket.emit('ffmpeg_stderr',''+d);
 		});
 		//ffmpeg_process.stderr.pipe(process.stderr);
 		ffmpeg_process.on('error',function(e){
-			console.log('error!',error);
+			socket.emit('fatal','ffmpeg error!'+d);
 			feedStream=false;
+			socket.disconnect();
 		});
 		//new subprocess process
 
@@ -98,12 +97,10 @@ io.on('connection', function(socket){
 			return;
 		}
 		feedStream(m);
-		//videoStream.push(m);
-		//console.log('pushed',m.length);
 	});
 	socket.on('disconnect', function () {
-		console.log('user disconnected');
-		try{ffmpeg_process.kill('SIGHUP');}catch(e){console.log('killing attempt failed...');}
+		//console.log('user disconnected');
+		try{ffmpeg_process.kill('SIGHUP');}catch(e){console.warn('killing ffmoeg process attempt failed...');}
 	});
 });
 
