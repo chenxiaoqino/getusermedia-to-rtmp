@@ -22,7 +22,7 @@ The audio stream is corrupted due to timestamp issues if streamed directly. Shou
 2. No Chrome Yet
 Beside MediaRecorder issue, Chrome forces `getUserMedia` to be requested over SSL. (will deal with that later)
 3. No resolution adjustment yet
-Firefox does not honor video size constrains as well as Chrome does. Therefore, the server should enforce the correct resolution. (coming soon)
+The server should allow resizing the output video. (coming soon)
 4. Configurable server with SSL (coming soon)
 5. Configurable client (coming soon)
 6. `socket.io` has bad efficiency doing binary websocket
