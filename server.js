@@ -73,7 +73,8 @@ io.on('connection', function(socket){
 			try{
 				ffmpeg_process.stdin.write(data);
 			}catch(e){
-				socket.emit('exception',e);
+				//socket.emit('feedstream_exception',e);
+				console.log('write exception:'+e);
 				//ignore some segment in pipe is okay...
 			}
 		}
@@ -84,9 +85,10 @@ io.on('connection', function(socket){
 		});
 		//ffmpeg_process.stderr.pipe(process.stderr);
 		ffmpeg_process.on('error',function(e){
-			socket.emit('fatal','ffmpeg error!'+d);
+			console.log('child process error'+e);
+			//socket.emit('fatal','ffmpeg error!'+d);
 			feedStream=false;
-			socket.disconnect();
+			//socket.disconnect();
 		});
 		//new subprocess process
 
@@ -101,8 +103,20 @@ io.on('connection', function(socket){
 	});
 	socket.on('disconnect', function () {
 		//console.log('user disconnected');
-		try{ffmpeg_process.kill('SIGHUP');}catch(e){console.warn('killing ffmoeg process attempt failed...');}
+		feedStream=false;
+		if(ffmpeg_process)
+		try{
+			ffmpeg_process.stdin.end();
+			ffmpeg_process.kill('SIGINT');
+		}catch(e){console.warn('killing ffmoeg process attempt failed...');}
 	});
+	socket.on('error',function(e){
+		console.log('socket.io error:'+e);
+	});
+});
+
+io.on('error',function(e){
+	console.log('socket.io error:'+e);
 });
 
 http.listen(8888, function(){
