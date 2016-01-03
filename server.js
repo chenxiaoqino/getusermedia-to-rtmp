@@ -61,7 +61,9 @@ io.on('connection', function(socket){
 		var ops=[
 			'-vcodec', socket._vcodec,'-i','-',
 			'-c:v', 'libx264', '-preset', 'veryfast', '-tune', 'zerolatency',
-			'-async', '1', '-filter_complex', 'aresample=44100',
+			'-an', //TODO: give up audio for now...
+			//'-async', '1', 
+			//'-filter_complex', 'aresample=44100', //necessary for trunked streaming?
 			//'-strict', 'experimental', '-c:a', 'aac', '-b:a', '128k',
 			'-bufsize', '1000',
 			'-f', 'flv', socket._rtmpDestination
@@ -69,19 +71,19 @@ io.on('connection', function(socket){
 		console.log('ffmpeg starting with ops',ops);
 		ffmpeg_process=spawn('ffmpeg', ops);
 		feedStream=function(data){
-			ffmpeg_process.stdin.write(data);
-			console.log('pushed data',data.length);
+			try{
+				ffmpeg_process.stdin.write(data);
+				console.log('pushed data',data.length);
+			}catch(e){
+				//ignore some segment in pipe is okay
+			}
 		}
-		/*
-		ffmpeg_process.stdout.on('data',function(d){
-			//console.log('stdout:'+d);
-			socket.emit('stdout','ffmpeg:'+d);
-		});
+
 		ffmpeg_process.stderr.on('data',function(d){
 			console.log('stderr:'+d);
-			//socket.emit('error','ffmpeg:'+d);
-		});*/
-		ffmpeg_process.stderr.pipe(process.stderr);
+			socket.emit('ffmpeg_stderr',''+d);
+		});
+		//ffmpeg_process.stderr.pipe(process.stderr);
 		ffmpeg_process.on('error',function(e){
 			console.log('error!',error);
 			feedStream=false;
@@ -101,7 +103,7 @@ io.on('connection', function(socket){
 	});
 	socket.on('disconnect', function () {
 		console.log('user disconnected');
-		//process.kill(?9)
+		try{ffmpeg_process.kill('SIGHUP');}catch(e){console.log('killing attempt failed...');}
 	});
 });
 

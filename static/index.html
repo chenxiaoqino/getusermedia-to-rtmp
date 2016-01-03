@@ -13,6 +13,7 @@ navigator.getUserMedia = (navigator.getUserMedia ||
                           navigator.webkitGetUserMedia);
 if(!navigator.getUserMedia){fail('No getUserMedia() available.');}
 if(!MediaRecorder){fail('No MediaRecorder available.');}
+var mediaRecorder;
 
 var socket = io();
 socket.on('message',function(m){
@@ -22,9 +23,13 @@ socket.on('fatal',function(m){
 	console.log('recv error message',m);
 	alert('Error:'+m);
 });
+socket.on('ffmpeg_stderr',function(m){console.log(m);});
+socket.on('disconnect', function () {
+	console.log('server disconnected');
+	mediaRecorder.stop();
+});
 
 socket.emit('config_rtmpDestination','rtmp://127.0.0.1/live');
-
 
 var constraints = { audio: true, video:{
 	mandatory: {
@@ -36,8 +41,8 @@ var constraints = { audio: true, video:{
 }};
 var onSuccess = function(stream) {
 	socket.emit('start','start');
-	var mediaRecorder = new MediaRecorder(stream);
-	mediaRecorder.start(500);
+	mediaRecorder = new MediaRecorder(stream);
+	mediaRecorder.start(2000);
 
 	mediaRecorder.onstop = function(e) {
 	}
@@ -49,7 +54,7 @@ var onSuccess = function(stream) {
 }
 
 var onError = function(err) {
-console.log('The following error occured: ' + err);
+	console.log('The following error occured: ' + err);
 }
 
 navigator.getUserMedia(constraints, onSuccess, onError);
