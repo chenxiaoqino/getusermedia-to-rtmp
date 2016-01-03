@@ -33,14 +33,12 @@ socket.on('disconnect', function () {
 
 socket.emit('config_rtmpDestination','rtmp://127.0.0.1/live');
 
-var constraints = { audio: true, video:{
-	mandatory: {
-		maxWidth: 480,
-		minWidth: 480,
-		maxHeight: 360,
-		minHeight: 360,
-	}
-}};
+var constraints = { audio: true, 
+	video:{
+        width: { min: 480, ideal: 480, max: 480 },
+        height: { min: 360, ideal: 360, max: 360 },
+    }
+};
 var onSuccess = function(stream) {
 	socket.emit('start','start');
 	mediaRecorder = new MediaRecorder(stream);
