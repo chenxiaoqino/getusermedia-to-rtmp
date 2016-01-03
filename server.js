@@ -16,7 +16,8 @@ app.use(express.static('static'));
 
 io.on('connection', function(socket){
 	//console.log('a user connected');
-	socket.emit('message','Hello from socket.io server!');
+	socket.emit('message','Hello from mediarecorder-to-rtmp server!');
+	socket.emit('message','Please set rtmp destination before start streaming.');
 	//socket.on('message',function(m){
 	//	console.log('client message:',m);
 	//});
@@ -27,7 +28,7 @@ io.on('connection', function(socket){
 			socket.emit('fatal','rtmp destination setup error.');
 			return;
 		}
-		var regexValidator=/^rtmp:\/\/[^\s]*$/;//TODO: should read config
+		var regexValidator=/^rtmp:\/\/127.0.0.1\/[^\s]*$/;//TODO: should read config
 		if(!regexValidator.test(m)){
 			socket.emit('fatal','rtmp address rejected.');
 			return;
