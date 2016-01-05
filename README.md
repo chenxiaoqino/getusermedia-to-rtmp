@@ -19,26 +19,26 @@ From `getUserMedia`, `MediaRecorder`, via `socket.io` to `nodejs`, then to `ffmp
 
 This is still a relatively primitive project, and a lot of work still need to be done.
 
-1. No Audio Yet
+- No Audio Yet
 
 The audio stream is corrupted due to timestamp issues if streamed directly. Should be resolved if `ffmpeg` is configured properly.
 
-2. No Chrome Yet
+- No Chrome Yet
 
 Beside MediaRecorder implementation issue, Chrome forces `getUserMedia` to be requested over SSL. (will deal with that later)
 
-3. No resolution adjustment on server-side yet
+- No resolution adjustment on server-side yet
 
 The server should allow resizing the output video. (coming soon)
 
-4. Configurable server with SSL (coming soon)
+- Configurable server with SSL (coming soon)
 
-5. Configurable client (coming soon)
+- Configurable client (coming soon)
 
-6. `socket.io` has bad efficiency doing binary websocket
+- `socket.io` has bad efficiency doing binary websocket
 
 Should migrate to raw websocket (later).
 
-7. Rate-limiting
+- Rate-limiting
 
 Consider automatically adjust upstream rate via WebSocket `bufferedAmount` attribute. (Note that locally the rate can only be adjusted by video size...)
