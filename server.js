@@ -30,6 +30,7 @@ io.on('connection', function(socket){
 			return;
 		}
 		socket._rtmpDestination=m;
+		socket.emit('message','rtmp destination set to:'+m);
 	}); 
 	socket._vcodec='libvpx';//from firefox default encoder
 	socket.on('config_vcodec',function(m){

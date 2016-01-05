@@ -1,12 +1,61 @@
 <!doctype>
 <html>
 <head>
-	<title>MediaRecorder test</title>
+	<title>MediaRecorder to RTMP Demo</title>
 	<script src="/socket.io/socket.io.js"></script>
 </head>
-<body>
+<body style="max-width:800px;height:100%;margin:auto;">
+<h1>
+MediaRecorder to RTMP Demo
+</h1>
+<label for="option_width" >Size:</label>
+<input type="text" id="option_width" value="480"/> &times;
+<input type="text" id="option_height" value="360"/>
+<br>
+<label for="option_url" >RTMP Destination:</label>
+<input type="text" id="option_url" value="rtmp://localhost/live"/>
+<br>
+<button id="button_start">Start streaming</button>
+<hr/>
+<div>
+	<p id="output_message"></p>
+	<video id="output_video" autoplay=true></video>
+</div>
+<hr/>
+<textarea readonly="true" id="output_console" cols=91 rows=5>
+</textarea>
+
 	<script>
 function fail(str){alert(str+"\nPlease download the latest version of Firefox!");location.replace('http://mozilla.org/firefox');}
+var output_console=document.getElementById('output_console'),
+	output_message=document.getElementById('output_message'),
+	output_video=document.getElementById('output_video'),
+	option_url=document.getElementById('option_url'),
+	option_width=document.getElementById('option_width'),
+	option_height=document.getElementById('option_height'),
+	button_start=document.getElementById('button_start'),
+	height=option_height.value,
+	width=option_width.value,
+	url=option_url.value;
+
+option_height.onchange=option_height.onkeyup=function(){height=this.value;}
+option_width.onchange=option_width.onkeyup=function(){width=this.value;}
+option_url.onchange=option_url.onkeyup=function(){url=this.value;}
+button_start.onclick=requestMedia;
+function video_show(stream){
+  if (window.URL) {
+    output_video.src = window.URL.createObjectURL(stream);
+  } else {
+    output_video.src = stream;
+  }
+  output_message.innerHTML="Local video source size:"+output_video.videoWidth+"x"+output_video.videoHeight;
+}
+function show_output(str){
+	output_console.value+="\n"+str;
+	output_console.scrollTop = output_console.scrollHeight;
+}
+
+
 navigator.getUserMedia = (navigator.getUserMedia ||
                           navigator.mozGetUserMedia ||
                           navigator.msGetUserMedia ||
@@ -14,24 +63,24 @@ navigator.getUserMedia = (navigator.getUserMedia ||
 if(!navigator.getUserMedia){fail('No getUserMedia() available.');}
 if(!MediaRecorder){fail('No MediaRecorder available.');}
 var mediaRecorder;
-
 var socket = io();
 socket.on('message',function(m){
 	console.log('recv server message',m);
+	show_output('SERVER:'+m);
 });
 socket.on('fatal',function(m){
-	console.log('recv error message',m);
+	show_output('ERROR: unexpected:'+m);
 	alert('Error:'+m);
 	mediaRecorder.stop();
 	//should reload?
 });
-socket.on('ffmpeg_stderr',function(m){console.log(m);});
+socket.on('ffmpeg_stderr',function(m){
+	show_output('FFMPEG:'+m);
+});
 socket.on('disconnect', function () {
-	console.log('server disconnected');
+	show_output('ERROR: server disconnected!');
 	mediaRecorder.stop();
 });
-
-socket.emit('config_rtmpDestination','rtmp://127.0.0.1/live');
 
 var constraints = { audio: true, 
 	video:{
@@ -39,7 +88,10 @@ var constraints = { audio: true,
         height: { min: 360, ideal: 360, max: 360 },
     }
 };
-var onSuccess = function(stream) {
+function onSuccess(stream) {
+	video_show(stream);//only show locally, not remotely
+	
+	socket.emit('config_rtmpDestination',url);
 	socket.emit('start','start');
 	mediaRecorder = new MediaRecorder(stream);
 	mediaRecorder.start(2000);
@@ -54,11 +106,13 @@ var onSuccess = function(stream) {
 	}
 }
 
-var onError = function(err) {
+function onError(err) {
 	console.log('The following error occured: ' + err);
+	show_output('Local getUserMedia ERROR:'+err);
 }
-
-navigator.getUserMedia(constraints, onSuccess, onError);
+function requestMedia(){
+	navigator.getUserMedia(constraints, onSuccess, onError);
+}
 	</script>
 </body>
 </html>
