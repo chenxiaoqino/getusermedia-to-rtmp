@@ -36,12 +36,13 @@ var output_console=document.getElementById('output_console'),
 	button_start=document.getElementById('button_start'),
 	height=option_height.value,
 	width=option_width.value,
-	url=option_url.value;
+	url=option_url.value='rtmp://'+location.host.split(':')[0]+'/live';
 
 option_height.onchange=option_height.onkeyup=function(){height=this.value;}
 option_width.onchange=option_width.onkeyup=function(){width=this.value;}
 option_url.onchange=option_url.onkeyup=function(){url=this.value;}
 button_start.onclick=requestMedia;
+
 function video_show(stream){
   if (window.URL) {
     output_video.src = window.URL.createObjectURL(stream);
