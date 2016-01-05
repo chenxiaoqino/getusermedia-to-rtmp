@@ -36,7 +36,7 @@ var output_console=document.getElementById('output_console'),
 	button_start=document.getElementById('button_start'),
 	height=option_height.value,
 	width=option_width.value,
-	url=option_url.value='rtmp://'+location.host.split(':')[0]+'/live';
+	url=option_url.value='rtmp://'+location.host.split(':')[0]+':1935/live';
 
 option_height.onchange=option_height.onkeyup=function(){height=this.value;}
 option_width.onchange=option_width.onkeyup=function(){width=this.value;}
@@ -87,8 +87,8 @@ socket.on('disconnect', function () {
 
 var constraints = { audio: true, 
 	video:{
-        width: { min: 480, ideal: 480, max: 480 },
-        height: { min: 360, ideal: 360, max: 360 },
+        width: { min: width, ideal: width, max: width },
+        height: { min: height, ideal: height, max: height },
     }
 };
 function onSuccess(stream) {
