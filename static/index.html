@@ -38,8 +38,8 @@ var output_console=document.getElementById('output_console'),
 	width=option_width.value,
 	url=option_url.value='rtmp://'+location.host.split(':')[0]+':1935/live';
 
-option_height.onchange=option_height.onkeyup=function(){height=this.value;}
-option_width.onchange=option_width.onkeyup=function(){width=this.value;}
+option_height.onchange=option_height.onkeyup=function(){height=1*this.value;}
+option_width.onchange=option_width.onkeyup=function(){width=1*this.value;}
 option_url.onchange=option_url.onkeyup=function(){url=this.value;}
 button_start.onclick=requestMedia;
 
@@ -85,12 +85,6 @@ socket.on('disconnect', function () {
 	mediaRecorder.stop();
 });
 
-var constraints = { audio: true, 
-	video:{
-        width: { min: width, ideal: width, max: width },
-        height: { min: height, ideal: height, max: height },
-    }
-};
 function onSuccess(stream) {
 	video_show(stream);//only show locally, not remotely
 	
@@ -114,6 +108,12 @@ function onError(err) {
 	show_output('Local getUserMedia ERROR:'+err);
 }
 function requestMedia(){
+	var constraints = { audio: true, 
+		video:{
+	        width: { min: width, ideal: width, max: width },
+	        height: { min: height, ideal: height, max: height },
+	    }
+	};
 	navigator.getUserMedia(constraints, onSuccess, onError);
 }
 	</script>
