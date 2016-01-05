@@ -48,9 +48,9 @@ function video_show(stream){
   } else {
     output_video.src = stream;
   }
-  output_video.onload=function(){
-  	output_message.innerHTML="Local video source size:"+output_video.videoWidth+"x"+output_video.videoHeight;
-  }
+  output_video.addEventListener( "loadedmetadata", function (e) {
+	output_message.innerHTML="Local video source size:"+output_video.videoWidth+"x"+output_video.videoHeight;
+}, false );
 }
 function show_output(str){
 	output_console.value+="\n"+str;
