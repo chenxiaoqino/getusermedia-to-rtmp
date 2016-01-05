@@ -4,9 +4,11 @@ This project intends to allow an endpoint user to submit RTMP live video streami
 
 ## Usage
 
-Start the server by `npm install` and `node server.js`, then open firefox to http://127.0.0.1:8888/ . The rtmp stream will be submitted to rtmp://127.0.0.1/live .
+Start the server by `npm install` and `node server.js`, then open firefox to http://127.0.0.1:8888/ . The rtmp stream will be submitted to rtmp://127.0.0.1/live by default.
 
 Please make sure there's an rtmp server up and running; try `nginx-rtmp-module` if you don't have one.
+
+In production, the server should limit what the client can choose to push stream to.
 
 ## How does it work
 
@@ -18,12 +20,25 @@ From `getUserMedia`, `MediaRecorder`, via `socket.io` to `nodejs`, then to `ffmp
 This is still a relatively primitive project, and a lot of work still need to be done.
 
 1. No Audio Yet
+
 The audio stream is corrupted due to timestamp issues if streamed directly. Should be resolved if `ffmpeg` is configured properly.
+
 2. No Chrome Yet
-Beside MediaRecorder issue, Chrome forces `getUserMedia` to be requested over SSL. (will deal with that later)
-3. No resolution adjustment yet
+
+Beside MediaRecorder implementation issue, Chrome forces `getUserMedia` to be requested over SSL. (will deal with that later)
+
+3. No resolution adjustment on server-side yet
+
 The server should allow resizing the output video. (coming soon)
+
 4. Configurable server with SSL (coming soon)
+
 5. Configurable client (coming soon)
+
 6. `socket.io` has bad efficiency doing binary websocket
+
 Should migrate to raw websocket (later).
+
+7. Rate-limiting
+
+Consider automatically adjust upstream rate via WebSocket `bufferedAmount` attribute. (Note that locally the rate can only be adjusted by video size...)
