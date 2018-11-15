@@ -44,11 +44,11 @@ option_url.onchange=option_url.onkeyup=function(){url=this.value;}
 button_start.onclick=requestMedia;
 
 function video_show(stream){
-  if (window.URL) {
-    output_video.src = window.URL.createObjectURL(stream);
-  } else {
-    output_video.src = stream;
-  }
+	if ("srcObject" in output_video) {
+		output_video.srcObject = stream;
+	} else {
+		output_video.src = window.URL.createObjectURL(stream);
+	}
   output_video.addEventListener( "loadedmetadata", function (e) {
 	output_message.innerHTML="Local video source size:"+output_video.videoWidth+"x"+output_video.videoHeight;
 }, false );
@@ -85,36 +85,33 @@ socket.on('disconnect', function () {
 	mediaRecorder.stop();
 });
 
-function onSuccess(stream) {
-	video_show(stream);//only show locally, not remotely
-	
-	socket.emit('config_rtmpDestination',url);
-	socket.emit('start','start');
-	mediaRecorder = new MediaRecorder(stream);
-	mediaRecorder.start(2000);
-
-	mediaRecorder.onstop = function(e) {
-		stream.stop();
-	}
-
-	mediaRecorder.ondataavailable = function(e) {
-	  socket.emit("binarystream",e.data);
-	  //chunks.push(e.data);
-	}
-}
-
-function onError(err) {
-	console.log('The following error occured: ' + err);
-	show_output('Local getUserMedia ERROR:'+err);
-}
 function requestMedia(){
-	var constraints = { audio: true, 
+	var constraints = { audio: true,
 		video:{
 	        width: { min: width, ideal: width, max: width },
 	        height: { min: height, ideal: height, max: height },
 	    }
 	};
-	navigator.getUserMedia(constraints, onSuccess, onError);
+	navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
+		video_show(stream);//only show locally, not remotely
+
+		socket.emit('config_rtmpDestination',url);
+		socket.emit('start','start');
+		mediaRecorder = new MediaRecorder(stream);
+		mediaRecorder.start(2000);
+
+		mediaRecorder.onstop = function(e) {
+			stream.stop();
+		}
+
+		mediaRecorder.ondataavailable = function(e) {
+		  socket.emit("binarystream",e.data);
+		  //chunks.push(e.data);
+		}
+	}).catch(function(err) {
+		console.log('The following error occured: ' + err);
+		show_output('Local getUserMedia ERROR:'+err);
+	});
 }
 	</script>
 </body>
