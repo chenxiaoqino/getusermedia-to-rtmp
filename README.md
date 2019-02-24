@@ -50,4 +50,5 @@ openssl x509 -req -in abels-csr.pem -signkey abels-key.pem -out abels-cert.pem
 
 https://www.youtube.com/watch?v=O3iOWRugHbA
 
-anddd enjoy
+and enjoy
+test rtmp server adobe media server or livego server
