@@ -36,7 +36,7 @@ var output_console=document.getElementById('output_console'),
 	button_start=document.getElementById('button_start'),
 	height=option_height.value,
 	width=option_width.value,
-	url=option_url.value='rtmp://'+location.host.split(':')[0]+':1935/live';
+	url=option_url.value='rtmp://'+location.host.split(':')[0]+':1935/live/test';
 
 option_height.onchange=option_height.onkeyup=function(){height=1*this.value;}
 option_width.onchange=option_width.onkeyup=function(){width=1*this.value;}
@@ -66,7 +66,15 @@ navigator.getUserMedia = (navigator.getUserMedia ||
 if(!navigator.getUserMedia){fail('No getUserMedia() available.');}
 if(!MediaRecorder){fail('No MediaRecorder available.');}
 var mediaRecorder;
-var socket = io();
+var socket = io.connect("https://localhost", {secure: true});
+//({
+  // option 1
+ // ca: fs.readFileSync("https://localhost:443",'./abels-cert.pem'),
+  // option 2. WARNING: it leaves you vulnerable to MITM attacks!
+   // requestCert: false,
+  //  rejectUnauthorized: false
+//});
+//var socket = io.
 socket.on('message',function(m){
 	console.log('recv server message',m);
 	show_output('SERVER:'+m);
@@ -94,17 +102,19 @@ function requestMedia(){
 	};
 	navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
 		video_show(stream);//only show locally, not remotely
-
+	
 		socket.emit('config_rtmpDestination',url);
 		socket.emit('start','start');
 		mediaRecorder = new MediaRecorder(stream);
 		mediaRecorder.start(2000);
-
+	
 		mediaRecorder.onstop = function(e) {
 			stream.stop();
+				
 		}
 
 		mediaRecorder.ondataavailable = function(e) {
+			
 		  socket.emit("binarystream",e.data);
 		  //chunks.push(e.data);
 		}
