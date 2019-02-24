@@ -42,3 +42,12 @@ Should migrate to raw websocket (later).
 - Rate-limiting
 
 Consider automatically adjust upstream rate via WebSocket `bufferedAmount` attribute. (Note that locally the rate can only be adjusted by video size...)
+
+##  create openssl
+openssl genrsa -out abels-key.pem 2048
+openssl req -new -sha256 -key  abels-key.pem -out abels-csr.pem
+openssl x509 -req -in abels-csr.pem -signkey abels-key.pem -out abels-cert.pem
+
+https://www.youtube.com/watch?v=O3iOWRugHbA
+
+anddd enjoy
