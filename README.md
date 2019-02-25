@@ -45,7 +45,9 @@ Consider automatically adjust upstream rate via WebSocket `bufferedAmount` attri
 
 ##  create openssl
 openssl genrsa -out abels-key.pem 2048
+
 openssl req -new -sha256 -key  abels-key.pem -out abels-csr.pem
+
 openssl x509 -req -in abels-csr.pem -signkey abels-key.pem -out abels-cert.pem
 
 https://www.youtube.com/watch?v=O3iOWRugHbA
