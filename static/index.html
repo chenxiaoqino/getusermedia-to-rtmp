@@ -1,3 +1,5 @@
+
+
 <html>
 <head>
 	<title>MediaRecorder to RTMP Demo</title>
@@ -38,7 +40,7 @@ MediaRecorder to RTMP Demo
 	</div>
 </div>
 <hr/>
-<textarea readonly="true" id="output_console" cols=91 rows=5>
+<textarea readonly="true" id="output_console" cols=180 rows=5>
 </textarea>
 <script src="flv.min.js"></script>
 
@@ -110,7 +112,7 @@ function video_show(stream){
 }
 function show_output(str){
 
-	output_console.value+="\n"+str;
+	output_console.value+="\n"+new Date()+str;
 	output_console.scrollTop = output_console.scrollHeight;
 }
 ;
