@@ -104,6 +104,8 @@ io.on('connection', function(socket){
 	socket.on('binarystream',function(m){
 		if(!feedStream){
 			socket.emit('fatal','rtmp not set yet.');
+			ffmpeg_process.stdin.end();
+			ffmpeg_process.kill('SIGINT');
 			return;
 		}
 		feedStream(m);
