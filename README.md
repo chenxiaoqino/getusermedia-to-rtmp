@@ -1,3 +1,5 @@
+![image](https://i.imgur.com/1cNMpvg.png)
+
 # HTML5 to RTMP streaming gateway proxy
 
 This project intends to allow an endpoint user to submit RTMP live video streaming directly using web browser and `getUserMedia`, without installing additional software. Currently, only Firefox with `MediaRecorder` API is supported.
@@ -43,7 +45,7 @@ Should migrate to raw websocket (later).
 
 Consider automatically adjust upstream rate via WebSocket `bufferedAmount` attribute. (Note that locally the rate can only be adjusted by video size...)
 
-##  create openssl
+##  Create openssl
 openssl genrsa -out abels-key.pem 2048
 
 openssl req -new -sha256 -key  abels-key.pem -out abels-csr.pem
@@ -54,3 +56,8 @@ https://www.youtube.com/watch?v=O3iOWRugHbA
 
 and enjoy
 test rtmp server adobe media server or livego server
+
+## 
+add customize_source
+add auto Reconnection
+add display flv use flv.js!!!
