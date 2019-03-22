@@ -105,8 +105,8 @@ over 40 min~ 50 min ......error
 			//'-b:a', '128k',
 			
 			'-benchmark',
-			-c:a copy , socket._rtmpDestination
-			'-f', 'flv', socket._rtmpDestination
+			-c:a copy , socket._rtmpDestination      // <==============solve??
+			//'-f', 'flv', socket._rtmpDestination
 		];
 ---
     
