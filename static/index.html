@@ -1,6 +1,3 @@
-<!doctype>
-<script src="flv.min.js"></script>
-
 <html>
 <head>
 	<title>MediaRecorder to RTMP Demo</title>
@@ -32,17 +29,21 @@ MediaRecorder to RTMP Demo
 <button id="button_setflvsource" >Set flvsource</button>
 
 <hr/>
-<div>
+<div >
 	<p id="output_message"></p>
 	
 	<video id="output_video" autoplay=true></video>
-	<video id="videoElement" preload="none"  ></video>
+	<div id="divtest">
+		<video id="videoElement" preload="none"  ></video>
+	</div>
 </div>
 <hr/>
 <textarea readonly="true" id="output_console" cols=91 rows=5>
 </textarea>
+<script src="flv.min.js"></script>
 
 <script>
+
 var flvPlayer;
 var flvsource = document.getElementById('flvsource') ;
 window.onload = function(){
@@ -76,8 +77,11 @@ button_start.disabled=true;
 
 	function flvsourceinitialize(){
 		 if (flvjs.isSupported()) {
-		
+			var insertDiv = document.getElementById("divtest")
+			insertDiv.innerHTML = "<video preload="+'"'+"none"+'"'+"id="+'"'+"videoElement"+'"'+"></video>"
+			flvPlayer = null;
         var videoElement = document.getElementById('videoElement');
+		
         flvPlayer = flvjs.createPlayer({
             type: 'flv',
             url: flvsource.value
@@ -85,6 +89,7 @@ button_start.disabled=true;
         flvPlayer.attachMediaElement(videoElement);
         flvPlayer.load();
         flvPlayer.play();
+
 		var media = document.getElementById("videoElement");
 		const playPromise = media.play();
 		if (playPromise !== null){
