@@ -46,12 +46,11 @@ Should migrate to raw websocket (later).
 Consider automatically adjust upstream rate via WebSocket `bufferedAmount` attribute. (Note that locally the rate can only be adjusted by video size...)
 
 ##  Create openssl
+```
 openssl genrsa -out abels-key.pem 2048
-
 openssl req -new -sha256 -key  abels-key.pem -out abels-csr.pem
-
 openssl x509 -req -in abels-csr.pem -signkey abels-key.pem -out abels-cert.pem
-
+```
 https://www.youtube.com/watch?v=O3iOWRugHbA
 
 and enjoy
@@ -62,51 +61,30 @@ adobe media server
 
 livego server
 
-## Add some function....
-add customize_source
+## FFMPEG options
+You may need to tune FFMPEG's options carefully for specific application need. Here are some brief explanation to common parameters, however there are many complex options possible -- please refer to FFMPEG manual. 
 
-add auto Reconnection
-
-add display flv use flv.js!!!
-
-The audio stream is corrupted due to timestamp issues if streamed directly. Should be resolved if ffmpeg is configured properly.
-over 40 min~ 50 min ......error 
 ---
 		var ops=[
-			'-re',
-			'-fflags', '+igndts',
-			'-i','-',
-			//'-r','60',
-			//'-vcodec', 'libx264',
-			'-qp', '0',
+			'-i','-', // Read from STDIN -- corresponding to we're passing raw binary video stream from socket.io to FFMPEG via STDIN pipe
+			'-re', // Read input at native frame rate. Mainly used to simulate a grab device. (Reset output frame rate back to normal)
+			// Note: you can also set frame rate explicitly by -r 24 or -r 30
+			'-fflags', '+igndts', // https://ffmpeg.org/ffmpeg-formats.html
 			'-vcodec', 'copy',
-			'-acodec', 'copy',
-			//'-preset','ultrafast',
+			'-acodec', 'copy', // Re-use the codec from browser.
+			// Note: you can also choose to re-encode the video here, e,g,:
+			// '-vcodec', 'libx264',
+			// '-acodec, 'libvorbis', 
+			'-preset','ultrafast', // Choosing encoding compression profle. Choose 'slow' to make output stream smaller, at the cost of higher CPU utilization.
+			// Available options: ultrafast; superfast; veryfast; faster; fast; medium – default preset; slow; slower; veryslow;
+			'-crf' ,'22', // Choosing encoding quality (higher bitrate or lower bitrate)
+			// You can also use QP value to adjust output stream quality, e.g.: 
+			// '-qp', '0',
+			// You can also specify output target bitrate directly, e.g.:
 			//'-b:v','1500K',
-			//'-crf' ,'22',
-			//'-profile:v', 'baseline',
-			//'-minrate' ,'5000k' ,
-			//'-b:v', '400k',
-			'-s', '1024x768',
-			//'-r','30',
-			//'-tune' ,'zerolatency',
-			//'-preset', 'ultrafast',
-			//'-an', //TODO: give up audio for now...
-			//'-async', '1', 
-			'-filter_complex', 'aresample=44100', //necessary for trunked streaming?
-			'-strict', 'experimental',
-			//'-strict', 'experimental', '-c:a', 'aac', '-b:a', '128k',
-			//'-bufsize', '1000',
-			//'-async','1',
-			"-fflags",'nobuffer',
-			'-analyzeduration','0',
-			//'-c:a', 'aac' ,
-			 -c:v copy  // <==============solve??
-			//'-b:a', '128k',
+			'-b:a','128K', // Audio bitrate
 			
-			'-benchmark',
-			-c:a copy , socket._rtmpDestination      // <==============solve??
-			//'-f', 'flv', socket._rtmpDestination
+			socket._rtmpDestination   // Send output stream to this RTMP address
 		];
 ---
     
