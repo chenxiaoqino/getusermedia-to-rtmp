@@ -67,13 +67,37 @@ io.on('connection', function(socket){
 		}
 		
 		var ops=[
+			'-re',
+			'-fflags', '+igndts',
 			'-i','-',
-			'-c:v', 'libx264', '-preset', 'veryfast', '-tune', 'zerolatency',
-			'-an', //TODO: give up audio for now...
+			//'-r','60',
+			//'-vcodec', 'libx264',
+			'-qp', '0',
+			'-vcodec', 'copy',
+			'-acodec', 'copy',
+			//'-preset','ultrafast',
+			//'-b:v','1500K',
+			//'-crf' ,'22',
+			//'-profile:v', 'baseline',
+			//'-minrate' ,'5000k' ,
+			//'-b:v', '400k',
+			'-s', '1024x768',
+			//'-r','30',
+			//'-tune' ,'zerolatency',
+			//'-preset', 'ultrafast',
+			//'-an', //TODO: give up audio for now...
 			//'-async', '1', 
 			'-filter_complex', 'aresample=44100', //necessary for trunked streaming?
+			'-strict', 'experimental',
 			//'-strict', 'experimental', '-c:a', 'aac', '-b:a', '128k',
-			'-bufsize', '1000',
+			//'-bufsize', '1000',
+			//'-async','1',
+			"-fflags",'nobuffer',
+			'-analyzeduration','0',
+			'-c:a', 'aac' ,
+			//'-b:a', '128k',
+			
+			'-benchmark',
 			'-f', 'flv', socket._rtmpDestination
 		];
 		
@@ -104,8 +128,10 @@ io.on('connection', function(socket){
 	socket.on('binarystream',function(m){
 		if(!feedStream){
 			socket.emit('fatal','rtmp not set yet.');
+			try{
 			ffmpeg_process.stdin.end();
 			ffmpeg_process.kill('SIGINT');
+			}catch(e){console.warn('killing ffmoeg process attempt failed...');}
 			return;
 		}
 		feedStream(m);
