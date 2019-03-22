@@ -128,10 +128,11 @@ io.on('connection', function(socket){
 	socket.on('binarystream',function(m){
 		if(!feedStream){
 			socket.emit('fatal','rtmp not set yet.');
-			try{
+			if(ffmpeg_process)
+		try{
 			ffmpeg_process.stdin.end();
 			ffmpeg_process.kill('SIGINT');
-			}catch(e){console.warn('killing ffmoeg process attempt failed...');}
+		}catch(e){console.warn('killing ffmoeg process attempt failed...');}
 			return;
 		}
 		feedStream(m);
