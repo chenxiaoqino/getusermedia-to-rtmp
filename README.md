@@ -101,9 +101,11 @@ over 40 min~ 50 min ......error
 			"-fflags",'nobuffer',
 			'-analyzeduration','0',
 			'-c:a', 'aac' ,
+			// -c:v copy ???? 
 			//'-b:a', '128k',
 			
 			'-benchmark',
+			-c:a copy , socket._rtmpDestination
 			'-f', 'flv', socket._rtmpDestination
 		];
 ---
