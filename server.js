@@ -102,7 +102,8 @@ io.on('connection', function(socket){
 		];
 		
 		console.log(socket._rtmpDestination);
-		ffmpeg_process=spawn('ffmpeg', ops);
+		if( !ffmpeg_process)
+			ffmpeg_process=spawn('ffmpeg', ops);
 		feedStream=function(data){
 			
 			ffmpeg_process.stdin.write(data);
