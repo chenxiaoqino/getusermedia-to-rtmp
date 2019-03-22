@@ -100,8 +100,8 @@ over 40 min~ 50 min ......error
 			//'-async','1',
 			"-fflags",'nobuffer',
 			'-analyzeduration','0',
-			'-c:a', 'aac' ,
-			// -c:v copy ???? 
+			//'-c:a', 'aac' ,
+			 -c:v copy  // <==============solve??
 			//'-b:a', '128k',
 			
 			'-benchmark',
