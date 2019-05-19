@@ -67,19 +67,15 @@ io.on('connection', function(socket){
 		}
 		
 		var ops=[
+			'-i','-',
+			'-c:v', 'libx264', '-preset', 'veryfast', '-tune', 'zerolatency',  // video codec config: low latency, adaptive bitrate
+			'-c:a', 'aac', '-ar', '44100', '-b:a', '64k', // audio codec config: sampling frequency (11025, 22050, 44100), bitrate 64 kbits
 			'-y', //force to overwrite
 			'-use_wallclock_as_timestamps', '1', // used for audio sync
-			'-i', '-', // the input stream
-			'-c:v', 'libx264', '-preset', 'veryfast', '-tune', 'zerolatency', // video tunes
-			//'-c:v', 'libx264', '-preset', 'slow', '-tune', 'zerolatency', '-crf', '22',
-			//'-pix_fmt', 'yuv420p',
-			//'-b:v', '700k', '-maxrate', '700k', // used for bandwith control (use with -bufsize)
-			'-c:a', 'aac', '-ar', '22050', // audio sampling frequency 11025, 22050, 44100
-			'-b:a', '64k', // audio 64 kbits
 			'-async', '1', // used for audio sync
-			'-fflags', '+genpts', // generate missing PTS if DTS is present. 
-			//'-filter_complex', 'aresample=44100', //necessary for trunked streaming?
-			//'-bufsize', '1000',
+			//'-filter_complex', 'aresample=44100', // resample audio to 44100Hz, needed if input is not 44100
+			//'-strict', 'experimental', 
+			'-bufsize', '1000',
 			'-f', 'flv', socket._rtmpDestination
 		];
 		

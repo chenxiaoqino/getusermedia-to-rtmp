@@ -21,9 +21,9 @@ From `getUserMedia`, `MediaRecorder`, via `socket.io` to `nodejs`, then to `ffmp
 
 This is still a relatively primitive project, and a lot of work still need to be done.
 
-- No Audio Yet
+- Audio support is experimental, YMMV
 
-The audio stream is corrupted due to timestamp issues if streamed directly. Should be resolved if `ffmpeg` is configured properly.
+Audio stream might get corrupted, and we need more test on the set of FFMpeg parameters. Feel free to open an issue to discuss your experience!
 
 - No Chrome Yet
 
