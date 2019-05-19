@@ -25,23 +25,19 @@ This is still a relatively primitive project, and a lot of work still need to be
 
 Audio stream might get corrupted, and we need more test on the set of FFMpeg parameters. Feel free to open an issue to discuss your experience!
 
-- No Chrome Yet
-
-Beside MediaRecorder implementation issue, Chrome forces `getUserMedia` to be requested over SSL. (will deal with that later)
-
 - No resolution adjustment on server-side yet
 
-The server should allow resizing the output video. (coming soon)
+The server should allow resizing the output video. This can be done by adding output resizing to the list of FFMpeg flags.
 
-- Configurable server with SSL (coming soon)
+- Configurable server with SSL, configurable clients
 
-- Configurable client (coming soon)
+Hack yourself. Pull request welcomed!
 
 - `socket.io` has bad efficiency doing binary websocket
 
-Should migrate to raw websocket (later).
-
 - Rate-limiting
+
+Currently there's no congestion control of any kind, so this works best in LAN environment.
 
 Consider automatically adjust upstream rate via WebSocket `bufferedAmount` attribute. (Note that locally the rate can only be adjusted by video size...)
 
@@ -57,9 +53,7 @@ and enjoy
 
 ## Server
 
-adobe media server 
-
-livego server
+You can set up your own RTMP server easily via [Nginx-RTMP-module](https://github.com/arut/nginx-rtmp-module), or push to adobe media server / livego server.
 
 ## FFMPEG options
 You may need to tune FFMPEG's options carefully for specific application need. Here are some brief explanation to common parameters, however there are many complex options possible -- please refer to FFMPEG manual. 
