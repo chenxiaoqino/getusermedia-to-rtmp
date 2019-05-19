@@ -67,19 +67,17 @@ io.on('connection', function(socket){
 		}
 		
 		var ops=[
-			'-y',
-			//'-strict', 'experimental',
-			'-use_wallclock_as_timestamps', '1',
-			//'-re',
-			'-i', '-',
-			'-c:v', 'libx264', '-preset', 'slow', '-tune', 'zerolatency', '-crf', '22', //'-pix_fmt', 'yuv420p',
-			//'-b:v', '700k', '-maxrate', '700k',
-			'-c:a', 'aac', '-ar', '22050',
-			'-b:a', '64k',
-			//'-f', 'lavfi',
-			'-async', '1',
-			'-fflags', '+genpts',
-			//'-bsf:v', 'h264_metadata=video_format=',
+			'-y', //force to overwrite
+			'-use_wallclock_as_timestamps', '1', // used for audio sync
+			'-i', '-', // the input stream
+			'-c:v', 'libx264', '-preset', 'veryfast', '-tune', 'zerolatency', // video tunes
+			//'-c:v', 'libx264', '-preset', 'slow', '-tune', 'zerolatency', '-crf', '22',
+			//'-pix_fmt', 'yuv420p',
+			//'-b:v', '700k', '-maxrate', '700k', // used for bandwith control (use with -bufsize)
+			'-c:a', 'aac', '-ar', '22050', // audio sampling frequency 11025, 22050, 44100
+			'-b:a', '64k', // audio 64 kbits
+			'-async', '1', // used for audio sync
+			'-fflags', '+genpts', // generate missing PTS if DTS is present. 
 			//'-filter_complex', 'aresample=44100', //necessary for trunked streaming?
 			//'-bufsize', '1000',
 			'-f', 'flv', socket._rtmpDestination
