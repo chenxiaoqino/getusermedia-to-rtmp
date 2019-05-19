@@ -67,13 +67,21 @@ io.on('connection', function(socket){
 		}
 		
 		var ops=[
-			'-i','-',
-			'-c:v', 'libx264', '-preset', 'veryfast', '-tune', 'zerolatency',
-			'-an', //TODO: give up audio for now...
-			//'-async', '1', 
-			'-filter_complex', 'aresample=44100', //necessary for trunked streaming?
-			//'-strict', 'experimental', '-c:a', 'aac', '-b:a', '128k',
-			'-bufsize', '1000',
+			'-y',
+			//'-strict', 'experimental',
+			'-use_wallclock_as_timestamps', '1',
+			//'-re',
+			'-i', '-',
+			'-c:v', 'libx264', '-preset', 'slow', '-tune', 'zerolatency', '-crf', '22', //'-pix_fmt', 'yuv420p',
+			//'-b:v', '700k', '-maxrate', '700k',
+			'-c:a', 'aac', '-ar', '22050',
+			'-b:a', '64k',
+			//'-f', 'lavfi',
+			'-async', '1',
+			'-fflags', '+genpts',
+			//'-bsf:v', 'h264_metadata=video_format=',
+			//'-filter_complex', 'aresample=44100', //necessary for trunked streaming?
+			//'-bufsize', '1000',
 			'-f', 'flv', socket._rtmpDestination
 		];
 		
