@@ -1,251 +1,278 @@
-<!doctype>
-<script src="flv.min.js"></script>
-
 <html>
+
 <head>
 	<title>MediaRecorder to RTMP Demo</title>
 	<script src="/socket.io/socket.io.js"></script>
 </head>
-<body style="max-width:1600px;height:100%;margin:auto;">
-<h1>
-MediaRecorder to RTMP Demo
-</h1>
-<label for="option_width" >Size:</label>
-<input type="text" id="option_width" value="640"/> &times;
 
-<input type="text" id="option_height" value="480"/>
-<br>
-<label for="socket.io_url" >Socket.io Destination:</label>
-<input type="text" id="socket.io_address" value="https://172.16.2.111"/>
-<br>
-<label for="flv_url" >flv_soruce Destination:</label>
-<input type="text" id="flvsource" value="https://172.16.2.111:444/live/test0.flv"/>
+<body style="max-width:2000px;height:100%;margin:auto;">
+	<h1>
+		MediaRecorder to RTMP Demo
+	</h1>
+	<label for="size">Size:</label>
+	<input type="text" id="option_width" value="640" /> &times;
+
+	<input type="text" id="option_height" value="480" />
+	<br>
+	<label for="resize">reSize:</label>
+	<input type="text" id="option_resize_width" value="640" /> &times;
+
+	<input type="text" id="option_resize_height" value="480" />
+	<br>
+	<label for="socket.io_url">Socket.io Destination:</label>
+	<input type="text" id="socket.io_address" value="https://127.0.0.1/" />
+	<br>
+	<label for="flv_url">flv_soruce Destination:</label>
+	<input type="text" id="flvsource" value="https://172.16.2.111:444/live/test0.flv" />
 
 
-<br>
-<label for="option_url" >RTMP Destination:</label>
-<input type="text" id="option_url" value="rtmp://localhost/live"/>
-<input type="checkbox"  id="checkbox_Reconection" checked="true">Reconnection 
-<br>
-<button id="button_server">Connect_server</button>
-<button id="button_start" >Start streaming</button>
-<button id="button_setflvsource" >Set flvsource</button>
+	<br>
+	<label for="option_url">RTMP Destination:</label>
+	<input type="text" id="option_url" value="rtmp://localhost/live" />
+	<input type="checkbox" id="checkbox_Reconection" checked="true">Reconnection
+	<br>
+	<button id="button_server">Connect_server</button>
+	<button id="button_start">Start streaming</button>
+	<button id="button_setflvsource">Set flvsource</button>
 
-<hr/>
-<div>
-	<p id="output_message"></p>
-	
-	<video id="output_video" autoplay=true></video>
-	<video id="videoElement" preload="none"  ></video>
-</div>
-<hr/>
-<textarea readonly="true" id="output_console" cols=91 rows=5>
+	<hr />
+	<div>
+		<p id="output_message"></p>
+		<div>
+
+			<video id="output_video" autoplay=true></video>
+
+
+			<span id="divtest">
+				<video id="videoElement" preload="none"></video>
+			</span>
+		</div>
+	</div>
+	<hr />
+	<textarea readonly="true" id="output_console" cols=160 rows=10>
 </textarea>
+	<script src="flv.min.js"></script>
 
-<script>
-var flvPlayer;
-var flvsource = document.getElementById('flvsource') ;
-window.onload = function(){
-		flvsourceinitialize();
-};
+	<script>
 
-function fail(str){alert(str+"\nPlease download the latest version of Firefox!");location.replace('http://mozilla.org/firefox');}
-var output_console=document.getElementById('output_console'),
-	output_message=document.getElementById('output_message'),
-	output_video=document.getElementById('output_video'),
-	option_url=document.getElementById('option_url'),
-	socketio_address=document.getElementById('socket.io_address'),
-	option_width=document.getElementById('option_width'),
-	option_height=document.getElementById('option_height'),
-	button_start=document.getElementById('button_start'),
-	height=option_height.value,
-	width=option_width.value,
-	url=option_url.value='rtmp://'+location.host.split(':')[0]+':1935/live/test0';
+		var flvPlayer;
+		var flvsource = document.getElementById('flvsource');
+		window.onload = function () {
+			flvsourceinitialize();
+		};
 
-option_height.onchange=option_height.onkeyup=function(){height=1*this.value;}
-option_width.onchange=option_width.onkeyup=function(){width=1*this.value;}
-option_url.onchange=option_url.onkeyup=function(){url=this.value;}
-button_start.onclick=requestMedia;
-button_server.onclick=connect_server;
-button_setflvsource.onclick = flvsourceinitialize;
-var mediaRecorder;
- var socket ;
- var state ="stop"; 
- var t;
-button_start.disabled=true;
-
-	function flvsourceinitialize(){
-		 if (flvjs.isSupported()) {
-		
-        var videoElement = document.getElementById('videoElement');
-        flvPlayer = flvjs.createPlayer({
-            type: 'flv',
-            url: flvsource.value
-        });
-        flvPlayer.attachMediaElement(videoElement);
-        flvPlayer.load();
-        flvPlayer.play();
-		var media = document.getElementById("videoElement");
-		const playPromise = media.play();
-		if (playPromise !== null){
-			playPromise.catch(() => { media.play(); })
-			output_message.innerHTML="change flvsource successful!";
-		}
-    }
-	};
-function video_show(stream){
-	if ("srcObject" in output_video) {
-		output_video.srcObject = stream;
-	} else {
-		output_video.src = window.URL.createObjectURL(stream);
-	}
-  output_video.addEventListener( "loadedmetadata", function (e) {
-	output_message.innerHTML="Local video source size:"+output_video.videoWidth+"x"+output_video.videoHeight;
-}, false );
-}
-function show_output(str){
-
-	output_console.value+="\n"+str;
-	output_console.scrollTop = output_console.scrollHeight;
-}
-;
-
-
-function timedCount()
- {
-	var oo=document.getElementById("checkbox_Reconection");
-if(oo.checked) {
-
- if(state=="ready"  ){ 
-
- requestMedia();
- button_start.disabled=false;
-button_server.disabled=true;
- }
- else{
-  t=setTimeout("timedCount()",1000);
-  connect_server();
-output_message.innerHTML="try connect server ...";
-button_start.disabled=true;
-button_server.disabled=false;
- }
- }
- else
- {
-button_start.disabled=true;
-button_server.disabled=false;
- }
- }
-
-function connect_server()
-{
-
-
-navigator.getUserMedia = (navigator.getUserMedia ||
-                          navigator.mozGetUserMedia ||
-                          navigator.msGetUserMedia ||
-                          navigator.webkitGetUserMedia);
-if(!navigator.getUserMedia){fail('No getUserMedia() available.');}
-if(!MediaRecorder){fail('No MediaRecorder available.');}
-
- socket = io.connect(socketio_address.value, {secure: true});
- //output_message.innerHTML=socket;
-socket.on('connect_error', function(){ 
-    
-	output_message.innerHTML="Connection Failed";
-});
-//({
-  // option 1
- // ca: fs.readFileSync("https://localhost:443",'./abels-cert.pem'),
-  // option 2. WARNING: it leaves you vulnerable to MITM attacks!
-   // requestCert: false,
-  //  rejectUnauthorized: false
-//});
-//var socket = io.
-//
-socket.on('message',function(m){
-	console.log('recv server message',m);
-	show_output('SERVER:'+m);
-});
-socket.on('fatal',function(m){
-
-	show_output('ERROR: unexpected:'+m);
-	//alert('Error:'+m);
-	mediaRecorder.stop();
-	state="stop";
-		button_start.disabled=true;
-button_server.disabled=false;
-	//document.getElementById('button_start').disabled=true;　
-	var oo=document.getElementById("checkbox_Reconection");
-if(oo.checked) {
-timedCount();
-output_message.innerHTML="server is reload!";
-//如果該checkbox有勾選應作的動作...
-}
-	//should reload?
-});
-socket.on('ffmpeg_stderr',function(m){
-
-	show_output('FFMPEG:'+m);
-});
-socket.on('disconnect', function () {
-	show_output('ERROR: server disconnected!');
-	mediaRecorder.stop();
-	state="stop";
-	button_start.disabled=true;
-button_server.disabled=false;
-		//	document.getElementById('button_start').disabled=true;　
-		var oo=document.getElementById("checkbox_Reconection");
-if(oo.checked) {
-timedCount();
-
-output_message.innerHTML="server is reload!";
-//如果該checkbox有勾選應作的動作...
-}
-})
-state="ready";
-button_start.disabled=false;
-button_server.disabled=true;
-	output_message.innerHTML="connect server successful";
-}
-
-
-function requestMedia(){
-	var constraints = { audio: true,
-		video:{
-	        width: { min: width, ideal: width, max: width },
-	        height: { min: height, ideal: height, max: height },
-	    }
-	};
-	navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
-		video_show(stream);//only show locally, not remotely
+		function fail(str) { alert(str + "\nPlease download the latest version of Firefox!"); location.replace('http://mozilla.org/firefox'); }
+		var output_console = document.getElementById('output_console'),
+			output_message = document.getElementById('output_message'),
+			output_video = document.getElementById('output_video'),
+			option_url = document.getElementById('option_url'),
+			socketio_address = document.getElementById('socket.io_address'),
+			option_width = document.getElementById('option_width'),
+			option_height = document.getElementById('option_height'),
+			button_start = document.getElementById('button_start'),
+			option_resize_width =document.getElementById('option_resize_width'),
+			option_resize_height =document.getElementById('option_resize_height'),
+			height = option_height.value+"",
+			width = option_width.value+"",
 	
-		socket.emit('config_rtmpDestination',url);
-		socket.emit('start','start');
-		mediaRecorder = new MediaRecorder(stream);
-		mediaRecorder.start(0);
+			url = option_url.value = 'rtmp://' + location.host.split(':')[0] + ':1935/live/test0';
 
-		mediaRecorder.onstop = function(e) {
-			stream.stop();
+		option_height.onchange = option_height.onkeyup = function () { height = 1 * this.value; }
+		option_width.onchange = option_width.onkeyup = function () { width = 1 * this.value; }
+		option_url.onchange = option_url.onkeyup = function () { url = this.value; }
+		button_start.onclick = requestMedia;
+		button_server.onclick = connect_server;
+		button_setflvsource.onclick = flvsourceinitialize;
+		var mediaRecorder;
+		var socket;
+		var state = "stop";
+		var t;
+		button_start.disabled = true;
+
+		function flvsourceinitialize() {
+			if (flvjs.isSupported()) {
+				var insertDiv = document.getElementById("divtest")
+				insertDiv.innerHTML = "<video preload=" + '"' + "none" + '"' + "id=" + '"' + "videoElement" + '"' + "></video>"
+				flvPlayer = null;
+				var videoElement = document.getElementById('videoElement');
+
+				flvPlayer = flvjs.createPlayer({
+					type: 'flv',
+					url: flvsource.value
+				}, {
+					enableWorker: true,
+					enableStashBuffer: false,
+					stashInitialSize: 128// 减少首桢显示等待时长
+				});
+				flvPlayer.attachMediaElement(videoElement);
+				flvPlayer.load();
+				//flvPlayer.play();
+
+				var media = document.getElementById("videoElement");
+				const playPromise = media.play();
+				if (playPromise !== null) {
+					playPromise.catch(() => { media.play(); })
+					output_message.innerHTML = "change flvsource successful!";
+				}
+			}
+		};
+		function video_show(stream) {
+			if ("srcObject" in output_video) {
+				output_video.srcObject = stream;
+			} else {
+				output_video.src = window.URL.createObjectURL(stream);
+			}
+			output_video.addEventListener("loadedmetadata", function (e) {
+				output_message.innerHTML = "Local video source size:" + output_video.videoWidth + "x" + output_video.videoHeight;
+			}, false);
+		}
+		function show_output(str) {
+
+			output_console.value += "\n" + new Date() + str;
+			output_console.scrollTop = output_console.scrollHeight;
+		}
+		;
+
+
+		function timedCount() {
+			var oo = document.getElementById("checkbox_Reconection");
+			if (oo.checked) {
+
+				if (state == "ready") {
+
+					requestMedia();
+					button_start.disabled = false;
+					button_server.disabled = true;
+				}
+				else {
+					t = setTimeout("timedCount()", 1000);
+					connect_server();
+					output_message.innerHTML = "try connect server ...";
+					button_start.disabled = true;
+					button_server.disabled = false;
+				}
+			}
+			else {
+				button_start.disabled = true;
+				button_server.disabled = false;
+			}
+		}
+
+		function connect_server() {
+
+
+			navigator.getUserMedia = (navigator.getUserMedia ||
+				navigator.mozGetUserMedia ||
+				navigator.msGetUserMedia ||
+				navigator.webkitGetUserMedia);
+			if (!navigator.getUserMedia) { fail('No getUserMedia() available.'); }
+			if (!MediaRecorder) { fail('No MediaRecorder available.'); }
+
+			socket = io.connect(socketio_address.value, { secure: true });
+			//output_message.innerHTML=socket;
+			socket.on('connect_error', function () {
+
+				output_message.innerHTML = "Connection Failed";
+			});
+			//({
+			// option 1
+			// ca: fs.readFileSync("https://localhost:443",'./abels-cert.pem'),
+			// option 2. WARNING: it leaves you vulnerable to MITM attacks!
+			// requestCert: false,
+			//  rejectUnauthorized: false
+			//});
+			//var socket = io.
+			//
+			socket.on('message', function (m) {
+				console.log('recv server message', m);
+				show_output('SERVER:' + m);
+			});
+			socket.on('fatal', function (m) {
+
+				show_output('ERROR: unexpected:' + m);
+				//alert('Error:'+m);
+				mediaRecorder.stop();
+				state = "stop";
+				button_start.disabled = true;
+				button_server.disabled = false;
+				//document.getElementById('button_start').disabled=true;　
+				var oo = document.getElementById("checkbox_Reconection");
+				if (oo.checked) {
+					timedCount();
+					output_message.innerHTML = "server is reload!";
+					//如果該checkbox有勾選應作的動作...
+				}
+				//should reload?
+			});
+			socket.on('ffmpeg_stderr', function (m) {
+
+				show_output('FFMPEG:' + m);
+			});
+			socket.on('disconnect', function () {
+				show_output('ERROR: server disconnected!');
+				mediaRecorder.stop();
+				state = "stop";
+				button_start.disabled = true;
+				button_server.disabled = false;
+				//	document.getElementById('button_start').disabled=true;　
+				var oo = document.getElementById("checkbox_Reconection");
+				if (oo.checked) {
+					timedCount();
+
+					output_message.innerHTML = "server is reload!";
+					//如果該checkbox有勾選應作的動作...
+				}
+			})
+			state = "ready";
+			button_start.disabled = false;
+			button_server.disabled = true;
+			output_message.innerHTML = "connect server successful";
+		}
+
+
+		function requestMedia() {
+			var constraints = {
+				audio: true,
+				video: {
+					width: { min: width, ideal: width, max: width },
+					height: { min: height, ideal: height, max: height },
+				}
+			};
+			navigator.mediaDevices.getUserMedia(constraints).then(function (stream) {
+				video_show(stream);//only show locally, not remotely
+
+				socket.emit('config_rtmpDestination', url);
+				var	resize_height = option_resize_height.value+"";
+				var resize_width = option_resize_width.value+"";
+			
+				socket.emit('config_option_size', {width:resize_width,height:resize_height});
 				
-		}
-		//document.getElementById('button_start').disabled=false;　
+				socket.emit('start', 'start');
+				mediaRecorder = new MediaRecorder(stream);
+				mediaRecorder.start(0);
 
-		mediaRecorder.ondataavailable = function(e) {
-		
-		  socket.emit("binarystream",e.data);
-		  state="start";
-		  //chunks.push(e.data);
+				mediaRecorder.onstop = function (e) {
+					stream.stop();
+
+				}
+				//document.getElementById('button_start').disabled=false;　
+
+				mediaRecorder.ondataavailable = function (e) {
+
+					socket.emit("binarystream", e.data);
+					state = "start";
+					//chunks.push(e.data);
+				}
+			}).catch(function (err) {
+				console.log('The following error occured: ' + err);
+				show_output('Local getUserMedia ERROR:' + err);
+				output_message.innerHTML = "Local video source size is not soupport or No camera ?" + output_video.videoWidth + "x" + output_video.videoHeight;
+				state = "stop";
+				button_start.disabled = true;
+				button_server.disabled = false;
+			});
 		}
-	}).catch(function(err) {
-		console.log('The following error occured: ' + err);
-		show_output('Local getUserMedia ERROR:'+err);
-		output_message.innerHTML="Local video source size is not soupport or No camera ?"+output_video.videoWidth+"x"+output_video.videoHeight;
-		 state="stop";
-		 button_start.disabled=true;
-		button_server.disabled=false;
-	});
-}
 	</script>
 </body>
+
 </html>
