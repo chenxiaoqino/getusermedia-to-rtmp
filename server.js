@@ -41,6 +41,12 @@ io.on('connection', function(socket){
 		socket._rtmpDestination=m;
 		socket.emit('message','rtmp destination set to:'+m);
 	}); 
+	socket.on('config_option_size', function (m) {
+		//var myJSON = JSON.stringify(m);
+		socket._height = m.height;
+		socket._width = m.width;
+		socket.emit('message', 'rtmp size set to:{width: '+m.width+ " : height:"+ + m.height+ '}');
+	});
 	//socket._vcodec='libvpx';//from firefox default encoder
 	socket.on('config_vcodec',function(m){
 		if(typeof m != 'string'){
@@ -73,6 +79,7 @@ io.on('connection', function(socket){
 			'-y', //force to overwrite
 			'-use_wallclock_as_timestamps', '1', // used for audio sync
 			'-async', '1', // used for audio sync
+			'-vf' , "scale = "+socket._width+":"+socket._height,
 			//'-filter_complex', 'aresample=44100', // resample audio to 44100Hz, needed if input is not 44100
 			//'-strict', 'experimental', 
 			'-bufsize', '1000',
